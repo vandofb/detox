@@ -1,6 +1,7 @@
 const log = require('npmlog');
 const IosNoneDevice = require('./devices/IosNoneDevice');
 const Simulator = require('./devices/Simulator');
+const IosPhysicalDevice = require('./devices/IosPhysicalDevice')
 const argparse = require('./utils/argparse');
 const InvocationManager = require('./invoke').InvocationManager;
 const configuration = require('./configuration');
@@ -23,6 +24,12 @@ class Detox {
     this.client = null;
     this.userConfig = userConfig;
     this.detoxConfig = {};
+
+    this._devicesByType = {
+      'ios.simulator': Simulator,
+      'ios.device': IosPhysicalDevice,
+      'ios.none': IosNoneDevice
+    };
   }
 
   async config() {
@@ -74,16 +81,13 @@ class Detox {
                       ${Object.keys(this.detoxConfig.configurations)}`);
     }
 
-    switch (deviceConfig.type) {
-      case "ios.simulator":
-        await this.initIosSimulator(deviceConfig);
-        break;
-      case "ios.none":
-        await this.initIosNoneDevice(deviceConfig);
-        break;
-      default:
-        throw new Error('only simulator is supported currently');
+    const device = this._devicesByType[deviceConfig.type];
+    if(!device) {
+      throw new Error(`unsupported configuration type ${deviceConfig.type}`);
     }
+
+    await this.initIosExpectations();
+    await this.setDevice(device, deviceConfig);
   }
 
   async setDevice(device, deviceConfig) {
@@ -96,16 +100,6 @@ class Detox {
     this.expect = require('./ios/expect');
     this.expect.exportGlobals();
     this.expect.setInvocationManager(new InvocationManager(this.client));
-  }
-
-  async initIosSimulator(deviceConfig) {
-    await this.initIosExpectations();
-    await this.setDevice(Simulator, deviceConfig);
-  }
-
-  async initIosNoneDevice(deviceConfig) {
-    await this.initIosExpectations();
-    await this.setDevice(IosNoneDevice, deviceConfig);
   }
 }
 

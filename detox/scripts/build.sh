@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 BABEL_ENV=test babel src -d lib
 if [ "$1" != "noframework" ]; then
