@@ -1,6 +1,6 @@
 describe('WaitFor', () => {
   beforeEach(async() => {
-    await device.reloadReactNative();
+    await device.relaunchApp();
     await element(by.label('WaitFor')).tap();
   });
 

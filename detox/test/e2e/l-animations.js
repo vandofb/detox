@@ -2,7 +2,7 @@ let _ = require('lodash');
 
 describe('Animations', () => {
   beforeEach(async () => {
-    await device.reloadReactNative();
+    await device.relaunchApp();
     await element(by.label('Animations')).tap();
   });
 

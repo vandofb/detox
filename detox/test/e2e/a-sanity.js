@@ -1,6 +1,6 @@
 describe('Sanity', () => {
   beforeEach(async () => {
-    await device.reloadReactNative();
+    await device.relaunchApp();
   });
 
   beforeEach(async () => {

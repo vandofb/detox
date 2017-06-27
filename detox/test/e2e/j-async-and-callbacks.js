@@ -1,6 +1,6 @@
 describe('Async and Callbacks', () => {
   beforeEach(async () => {
-    await device.reloadReactNative();
+    await device.relaunchApp();
     await element(by.label('Sanity')).tap();
   });
 
