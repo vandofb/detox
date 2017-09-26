@@ -203,9 +203,10 @@ class AppleSimUtils {
   }
 
   async _bootDeviceMagically(udid) {
-    const cmd = "/bin/bash -c '`xcode-select -p`/Applications/Simulator.app/Contents/MacOS/Simulator " +
-      `--args -CurrentDeviceUDID ${udid} -ConnectHardwareKeyboard 0 ` +
-      "-DeviceSetPath $HOME/Library/Developer/CoreSimulator/Devices > /dev/null 2>&1 < /dev/null &'";
+    // const cmd = "/bin/bash -c '`xcode-select -p`/Applications/Simulator.app/Contents/MacOS/Simulator " +
+    //   `--args -CurrentDeviceUDID ${udid} -ConnectHardwareKeyboard 0 ` +
+    //   "-DeviceSetPath $HOME/Library/Developer/CoreSimulator/Devices > /dev/null 2>&1 < /dev/null &'";
+    const cmd = `xcrun simctl boot ${udid}`;
     await exec.execWithRetriesAndLogs(cmd, undefined, { trying: `Launching device ${udid}...` }, 1);
   }
 
