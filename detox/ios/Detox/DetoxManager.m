@@ -20,6 +20,8 @@
 
 @end
 
+static id __profiler;
+
 __attribute__((constructor))
 static void detoxConditionalInit()
 {
@@ -41,6 +43,19 @@ static void detoxConditionalInit()
 	}
 
 	[[DetoxManager sharedInstance] connectToServer:detoxServer withSessionId:detoxSessionId];
+	
+	if(NSClassFromString(@"DTXProfiler") == nil)
+	{
+		NSURL* bundleURL = [NSBundle bundleForClass:[DetoxManager class]].bundleURL;
+		[[NSBundle bundleWithURL:[bundleURL URLByAppendingPathComponent:@"Frameworks/DTXProfiler.framework"]] load];
+	}
+	
+	if(NSClassFromString(@"DTXProfiler") == nil)
+	{
+		return;
+	}
+	
+	__profiler = [NSClassFromString(@"DTXProfiler") new];
 }
 
 
@@ -154,6 +169,54 @@ static void detoxConditionalInit()
 		statsStatus[@"messageId"] = messageId;
 		
 		[self.websocket sendAction:@"currentStatusResult" withParams:statsStatus withMessageId: messageId];
+	}
+	else if([type isEqualToString:@"startProfiling"])
+	{
+		//TODO: Handle params if needed
+		
+		id config = [NSClassFromString(@"DTXProfilingConfiguration") valueForKey:@"defaultProfilingConfiguration"];
+		[__profiler performSelector:NSSelectorFromString(@"startProfilingWithConfiguration:") withObject:config];
+		
+		[self.websocket sendAction:@"startProfilingDone" withParams:@{} withMessageId: messageId];
+	}
+	else if([type isEqualToString:@"stopProfiling"])
+	{
+		[__profiler performSelector:NSSelectorFromString(@"stopProfilingWithCompletionHandler:") withObject:^ (NSError* err) {
+			NSURL* url = [__profiler valueForKeyPath:@"profilingConfiguration.recordingFileURL"];
+			NSDictionary* rv;
+			if (err)
+			{
+				rv = @{@"error": err.localizedDescription};
+			}
+			else if(url != nil)
+			{
+				rv = @{@"recordingFileURL": url};
+			}
+			else
+			{
+				rv = @{};
+			}
+			
+			[self.websocket sendAction:@"stopProfilingDone" withParams:rv withMessageId: messageId];
+		}];
+	}
+	else if([type isEqualToString:@"pushSampleGroup"])
+	{
+		[__profiler performSelector:NSSelectorFromString(@"pushSampleGroupWithName:") withObject:params[@"name"]];
+		
+		[self.websocket sendAction:@"pushSampleGroupDone" withParams:@{} withMessageId: messageId];
+	}
+	else if([type isEqualToString:@"stopProfiling"])
+	{
+		[__profiler performSelector:NSSelectorFromString(@"popSampleGroup")];
+		
+		[self.websocket sendAction:@"popSampleGroupDone" withParams:@{} withMessageId: messageId];
+	}
+	if([type isEqualToString:@"addTag"])
+	{
+		[__profiler performSelector:NSSelectorFromString(@"addTag:") withObject:params[@"name"]];
+		
+		[self.websocket sendAction:@"addTagDone" withParams:@{} withMessageId: messageId];
 	}
 }
 

@@ -458,7 +458,6 @@
 				394767921DBF985400D72256 /* Sources */,
 				394767931DBF985400D72256 /* Frameworks */,
 				394767941DBF985400D72256 /* Headers */,
-				394767951DBF985400D72256 /* Resources */,
 				39C3C34B1DBF9A05008177E1 /* CopyFiles */,
 			);
 			buildRules = (
@@ -588,13 +587,6 @@
 				3928EFBE1E475E4C00C19B6E /* user_notification_calendar_trigger.json in Resources */,
 				3928EFBF1E475E4C00C19B6E /* user_notification_push_trigger.json in Resources */,
 				3928EFBD1E475E4C00C19B6E /* user_notification_location_trigger.json in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		394767951DBF985400D72256 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -862,6 +854,7 @@
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;
+				WARNING_CFLAGS = "-Wno-arc-performSelector-leaks";
 			};
 			name = Debug;
 		};
@@ -890,6 +883,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 3.0;
+				WARNING_CFLAGS = "-Wno-arc-performSelector-leaks";
 			};
 			name = Release;
 		};
