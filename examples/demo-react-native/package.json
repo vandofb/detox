@@ -10,15 +10,17 @@
     "react-native": "0.44.0"
   },
   "devDependencies": {
-    "mocha": "^3.2.0",
+    "mocha": "^4.0.1",
     "detox": "^5.0.0"
   },
   "detox": {
+    "test-runner": "mocha",
     "specs": "e2e",
+    "runner-config": "e2e/mocha.opts",
     "configurations": {
       "ios.sim.release": {
         "binaryPath": "ios/build/Build/Products/Release-iphonesimulator/example.app",
-        "build": "export RCT_NO_LAUNCH_PACKAGER=true && xcodebuild -project ios/example.xcodeproj -scheme example -configuration Release -sdk iphonesimulator -derivedDataPath ios/build",
+        "build": "export RCT_NO_LAUNCH_PACKAGER=true && xcodebuild -project ios/example.xcodeproj -scheme example -configuration Release -sdk iphonesimulator -derivedDataPath ios/build -quiet",
         "type": "ios.simulator",
         "name": "iPhone 7 Plus"
       },
