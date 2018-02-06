@@ -28,6 +28,31 @@ const isGreyMatcher = ({ name }) =>
 `)({
 		ARG: t.identifier(name)
 	});
+const isGreyAction = ({ name }) =>
+	template(`
+  if (
+    typeof ARG !== "object" || 
+    ARG.type !== "Invocation" ||
+    typeof ARG.value !== "object" || 
+    typeof ARG.value.target !== "object" ||
+    ARG.value.target.value !== "GREYActions"
+  ) {
+    throw new Error('${name} should be a GREYAction, but got ' + JSON.stringify(ARG));
+    }
+`)({
+		ARG: t.identifier(name)
+	});
+const isGreyElementInteraction = ({ name }) =>
+	template(`
+  if (
+    typeof ARG !== "object"
+  ) {
+		// TODO: This currently only checks for object, we should add more fine grained checks here
+    throw new Error('${name} should be a GREYElementInteraction, but got ' + JSON.stringify(ARG));
+  }
+`)({
+		ARG: t.identifier(name)
+	});
 const isArray = ({ name }) =>
 	template(`
 if (
@@ -46,6 +71,8 @@ module.exports = {
 	isBoolean,
 	isPoint,
 	isOneOf,
+	isGreyAction,
 	isGreyMatcher,
+	isGreyElementInteraction,
 	isArray
 };

@@ -13,7 +13,8 @@ module.exports = function({
 	supportedTypes,
 	classValue,
 	contentSanitizersForFunction,
-	contentSanitizersForType
+	contentSanitizersForType,
+	blacklistedFunctionNames = []
 }) {
 	/**
 	 * the input provided by objective-c-parser looks like this:
@@ -51,9 +52,16 @@ module.exports = function({
 			t.classBody(
 				json.methods
 					.filter(filterMethodsWithUnsupportedParams)
+					.filter(filterMethodsWithBlacklistedName)
 					.map(createMethod.bind(null, json))
 			),
 			[]
+		);
+	}
+
+	function filterMethodsWithBlacklistedName({ name }) {
+		return !blacklistedFunctionNames.find(
+			blacklisted => name.indexOf(blacklisted) !== -1
 		);
 	}
 
@@ -81,13 +89,22 @@ module.exports = function({
 	}
 
 	function createMethod(classJson, json) {
+		// For us this means that we don't set the class type, but let it be set from the outside
+		// This is an assumption based on our current experience with EarlGrey, we might need to rework this at some point
+		const isTranslucent = !json.static;
+		const args = json.args.map(({ name }) => t.identifier(name));
+
+		if (isTranslucent) {
+			args.unshift(t.identifier("element"));
+		}
+
 		const m = t.classMethod(
 			"method",
 			t.identifier(methodNameToSnakeCase(json.name)),
-			json.args.map(({ name }) => t.identifier(name)),
-			t.blockStatement(createMethodBody(classJson, json)),
+			args,
+			t.blockStatement(createMethodBody(classJson, json, isTranslucent)),
 			false,
-			json.static
+			true
 		);
 
 		if (json.comment) {
@@ -112,7 +129,7 @@ module.exports = function({
 		return json;
 	}
 
-	function createMethodBody(classJson, json) {
+	function createMethodBody(classJson, json, isTranslucent) {
 		const sanitizedJson = Object.assign({}, json, {
 			args: json.args.map(argJson => sanitizeArgumentType(argJson))
 		});
@@ -126,7 +143,11 @@ module.exports = function({
 			[]
 		);
 		const typeChecks = allTypeChecks.filter(check => typeof check === "object");
-		const returnStatement = createReturnStatement(classJson, sanitizedJson);
+		const returnStatement = createReturnStatement(
+			classJson,
+			sanitizedJson,
+			isTranslucent
+		);
 		return [...typeChecks, returnStatement];
 	}
 
@@ -163,11 +184,15 @@ module.exports = function({
 	}
 
 	// These types need no wrapping with {type: ..., value: }
-	const plainArgumentTypes = ["id<GREYMatcher>"];
+	const plainArgumentTypes = [
+		"id<GREYAction>",
+		"id<GREYMatcher>",
+		"GREYElementInteraction*"
+	];
 	function shouldBeWrapped({ type }) {
 		return !plainArgumentTypes.includes(type);
 	}
-	function createReturnStatement(classJson, json) {
+	function createReturnStatement(classJson, json, isTranslucent) {
 		const args = json.args.map(
 			arg =>
 				shouldBeWrapped(arg)
@@ -192,7 +217,9 @@ module.exports = function({
 						t.objectProperty(t.identifier("type"), t.stringLiteral("Class")),
 						t.objectProperty(
 							t.identifier("value"),
-							t.stringLiteral(classValue(classJson))
+							isTranslucent
+								? t.identifier("element")
+								: t.stringLiteral(classValue(classJson))
 						)
 					])
 				),
@@ -224,6 +251,12 @@ module.exports = function({
 			const json = isObjectiveC
 				? objectiveCParser(input)
 				: javaMethodParser(input);
+
+			// set default name
+			if (!json.name) {
+				const pathFragments = outputFile.split("/");
+				json.name = pathFragments[pathFragments.length - 1].replace(".js", "");
+			}
 			const ast = t.program([createClass(json), createExport(json)]);
 			const output = generate(ast);
 

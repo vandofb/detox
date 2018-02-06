@@ -103,4 +103,13 @@ describe("globals", () => {
 			).toThrowErrorMatchingSnapshot();
 		});
 	});
+
+	describe("sanitize_greyElementInteraction", () => {
+		it("should wrap the argument in an invocation", () => {
+			expect(globals.sanitize_greyElementInteraction("Foo")).toEqual({
+				type: "Invocation",
+				value: "Foo"
+			});
+		});
+	});
 });

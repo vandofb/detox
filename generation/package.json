@@ -23,7 +23,6 @@
 		"jest": "^20.0.4",
 		"lerna": "2.0.0-rc.4",
 		"lint-staged": "^6.0.0",
-		"objective-c-parser": "1.1.0",
 		"prettier": "^1.8.2",
 		"remove": "^0.1.5"
 	},
@@ -43,6 +42,7 @@
 	"dependencies": {
 		"babel-generate-guard-clauses": "^2.0.0",
 		"babel-template": "^6.26.0",
-		"java-method-parser": "^0.4.5"
+		"java-method-parser": "^0.4.5",
+		"objective-c-parser": "^1.2.2"
 	}
 }
