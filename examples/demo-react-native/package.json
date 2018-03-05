@@ -10,8 +10,8 @@
     "react-native": "^0.53.3"
   },
   "devDependencies": {
-    "mocha": "^4.0.1",
-    "detox": "^7.0.0"
+    "detox": "^7.1.0",
+    "mocha": "^4.1.0"
   },
   "detox": {
     "test-runner": "mocha",
