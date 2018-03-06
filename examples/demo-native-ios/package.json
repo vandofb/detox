@@ -3,8 +3,10 @@
 	"version": "0.0.1",
 	"private": true,
 	"devDependencies": {
-		"mocha": "^3.2.0",
-		"detox": "^6.0.0"
+		"babel-polyfill": "^6.26.0",
+		"detox": "^6.0.4",
+		"mocha": "^3.5.3",
+		"npmlog": "^4.1.2"
 	},
 	"detox": {
 		"specs": "e2e",
